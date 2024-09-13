@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { env } from '../env'
 
 export async function deleteGoalCompletion(completedId: string) {
-    await fetch(`${env.VITE_API_URL}/${completedId}`, {
+    await fetch(`${env.VITE_API_URL}/deleteCompletions/${completedId}`, {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json',
