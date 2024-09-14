@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import { X } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -20,7 +21,10 @@ import {
 } from './ui/radio-group'
 
 const createGoalForm = z.object({
-    title: z.string().min(1, 'Informe a atividade que deseja realizar'),
+    title: z
+        .string()
+        .min(1, 'Informe a atividade que deseja realizar')
+        .max(35, 'Deve conter no máximo 35 carácteres'),
     desiredWeeklyFrequency: z.coerce.number().min(1).max(7),
 })
 
@@ -64,9 +68,12 @@ export function CreateGoal() {
                     </DialogDescription>
                 </div>
 
-                <form
+                <motion.form
                     onSubmit={handleSubmit(handleCreateGoal)}
                     className="flex-1 flex flex-col justify-between"
+                    initial={{ opacity: 0, y: 50 }} // Começa fora da tela
+                    animate={{ opacity: 1, y: 0 }} // Anima para a posição original
+                    transition={{ duration: 0.4 }} // Controla a duração da animação
                 >
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col gap-2">
@@ -76,6 +83,11 @@ export function CreateGoal() {
                                 autoFocus
                                 placeholder="Praticar exercícios, meditar, etc..."
                                 {...register('title')}
+                                onChange={e => {
+                                    if (e.target.value.length <= 35) {
+                                        register('title').onChange(e)
+                                    }
+                                }}
                             />
                             {formState.errors.title && (
                                 <p className="text-red-400 text-sm">
@@ -179,7 +191,7 @@ export function CreateGoal() {
                         </DialogClose>
                         <Button className="flex-1">Salvar</Button>
                     </div>
-                </form>
+                </motion.form>
             </div>
         </DialogContent>
     )

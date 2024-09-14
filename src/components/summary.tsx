@@ -94,7 +94,9 @@ export function Summary() {
                 <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span>
                         Você completou{' '}
-                        <span className="text-zinc-100">{data?.completed}</span>{' '}
+                        <span className="text-zinc-100 truncate">
+                            {data?.completed}
+                        </span>{' '}
                         de <span className="text-zinc-100">{data?.total}</span>{' '}
                         metas nessa semana.
                     </span>
@@ -154,7 +156,7 @@ export function Summary() {
                                                     return (
                                                         <motion.li
                                                             key={goal.id}
-                                                            className="flex items-center gap-3"
+                                                            className="flex flex-wrap items-start gap-2 py-2"
                                                             variants={
                                                                 goalVariants
                                                             }
@@ -163,10 +165,15 @@ export function Summary() {
                                                             exit="exit"
                                                             layout
                                                         >
-                                                            <CheckCircle2 className="size-4 text-pink-500" />
+                                                            <CheckCircle2 className="size-4 text-pink-500 flex-shrink-0 mt-1" />
                                                             <span className="text-sm text-zinc-400">
                                                                 Você completou "
-                                                                <span className="text-zinc-100">
+                                                                <span
+                                                                    className="text-zinc-100 inline-block max-w-[150px] truncate align-bottom"
+                                                                    title={
+                                                                        goal.title
+                                                                    }
+                                                                >
                                                                     {goal.title}
                                                                 </span>
                                                                 " às{' '}
@@ -203,7 +210,7 @@ export function Summary() {
                     ) : (
                         <motion.p
                             className="text-zinc-400 text-sm"
-                            initial={{ opacity: 0, y: 20 }}
+                            initial={{ opacity: 0, y: 50 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.2 }}
                         >

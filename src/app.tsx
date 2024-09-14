@@ -6,7 +6,7 @@ import { Dialog } from './components/ui/dialog'
 import { getSummary } from './http/get-summary'
 
 export function App() {
-    const { data } = useQuery({
+    const { data, isLoading, isError } = useQuery({
         queryKey: ['summary'],
         queryFn: getSummary,
         staleTime: 1000 * 60,
@@ -14,7 +14,13 @@ export function App() {
 
     return (
         <Dialog>
-            {data?.total && data.total && data.total > 0 ? (
+            {isLoading ? (
+                <p className="flex items-center h-screen justify-center">
+                    Carregando suas metas...
+                </p>
+            ) : isError ? (
+                <EmptyGoals />
+            ) : data && data.total > 0 ? (
                 <Summary />
             ) : (
                 <EmptyGoals />
