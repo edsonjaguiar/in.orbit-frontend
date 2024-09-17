@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import ptBR from 'dayjs/locale/pt-br'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, Plus } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useDeleteGoalCompletion } from '../http/delete-goal-completion'
 import { getSummary } from '../http/get-summary'
 import { InOrbitIcon } from './in-orbit-icon'
@@ -40,12 +41,6 @@ export function Summary() {
         hidden: { y: 20, opacity: 0 },
         visible: { y: 0, opacity: 1 },
         exit: { y: -20, opacity: 0 },
-    }
-
-    const goalVariants = {
-        hidden: { x: -20, opacity: 0 },
-        visible: { x: 0, opacity: 1 },
-        exit: { x: 20, opacity: 0 },
     }
 
     const firstDayOfWeek = dayjs().startOf('week').format('DD')
@@ -146,61 +141,17 @@ export function Summary() {
                                             </span>
                                         </motion.h3>
 
-                                        <ul className="flex flex-col gap-3">
+                                        <ul className="flex flex-col gap-0.5">
                                             <AnimatePresence>
-                                                {goals.map(goal => {
-                                                    const time = dayjs(
-                                                        goal.completedAt
-                                                    ).format('HH:mm')
-
-                                                    return (
-                                                        <motion.li
-                                                            key={goal.id}
-                                                            className="flex flex-wrap items-start gap-2 py-2"
-                                                            variants={
-                                                                goalVariants
-                                                            }
-                                                            initial="hidden"
-                                                            animate="visible"
-                                                            exit="exit"
-                                                            layout
-                                                        >
-                                                            <CheckCircle2 className="size-4 text-pink-500 flex-shrink-0 mt-1" />
-                                                            <span className="text-sm text-zinc-400">
-                                                                Você completou "
-                                                                <span
-                                                                    className="text-zinc-100 inline-block max-w-[150px] truncate align-bottom"
-                                                                    title={
-                                                                        goal.title
-                                                                    }
-                                                                >
-                                                                    {goal.title}
-                                                                </span>
-                                                                " às{' '}
-                                                                <span className="text-zinc-100">
-                                                                    {time}h
-                                                                </span>
-                                                                <motion.button
-                                                                    type="button"
-                                                                    onClick={() =>
-                                                                        handleDeleteGoal(
-                                                                            goal.id
-                                                                        )
-                                                                    }
-                                                                    className="text-zinc-500 underline text-sm px-2"
-                                                                    whileHover={{
-                                                                        scale: 1.05,
-                                                                    }}
-                                                                    whileTap={{
-                                                                        scale: 0.95,
-                                                                    }}
-                                                                >
-                                                                    Desfazer
-                                                                </motion.button>
-                                                            </span>
-                                                        </motion.li>
-                                                    )
-                                                })}
+                                                {goals.map(goal => (
+                                                    <GoalItem
+                                                        key={goal.id}
+                                                        goal={goal}
+                                                        handleDeleteGoal={
+                                                            handleDeleteGoal
+                                                        }
+                                                    />
+                                                ))}
                                             </AnimatePresence>
                                         </ul>
                                     </motion.div>
@@ -220,5 +171,99 @@ export function Summary() {
                 </AnimatePresence>
             </motion.div>
         </div>
+    )
+}
+
+interface GoalItemProps {
+    goal: {
+        id: string
+        title: string
+        completedAt: string
+    }
+    handleDeleteGoal: (id: string) => void
+}
+
+interface GoalItemProps {
+    goal: {
+        id: string
+        title: string
+        completedAt: string
+    }
+    handleDeleteGoal: (id: string) => void
+}
+
+function GoalItem({ goal, handleDeleteGoal }: GoalItemProps) {
+    const [isHovered, setIsHovered] = useState(false)
+    const [isTextTruncated, setIsTextTruncated] = useState(false)
+    const textRef = useRef<HTMLSpanElement>(null)
+
+    const time = dayjs(goal.completedAt).format('HH:mm')
+
+    useEffect(() => {
+        if (textRef.current) {
+            setIsTextTruncated(
+                textRef.current.scrollWidth > textRef.current.clientWidth
+            )
+        }
+    }, [])
+
+    const variants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -20 },
+    }
+
+    return (
+        <motion.li
+            className="flex flex-wrap items-start gap-2 py-2 relative"
+            variants={variants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            layout
+            whileHover={{ scale: 1.02 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+        >
+            <CheckCircle2 className="size-4 text-pink-500 flex-shrink-0 mt-1" />
+            <div className="flex items-center gap-2">
+                <motion.span
+                    className="text-sm text-zinc-400 flex-grow"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
+                    Você completou "
+                    <motion.span
+                        ref={textRef}
+                        className={`text-zinc-100 inline-block ${
+                            isHovered ? 'max-w-none' : 'max-w-[150px] truncate'
+                        } align-bottom`}
+                        onMouseEnter={() =>
+                            isTextTruncated && setIsHovered(true)
+                        }
+                        onMouseLeave={() => setIsHovered(false)}
+                        layout
+                    >
+                        {goal.title}
+                    </motion.span>
+                    " às <span className="text-zinc-100">{time}h</span>
+                </motion.span>
+                {(!isHovered || !isTextTruncated) && (
+                    <motion.button
+                        type="button"
+                        onClick={() => handleDeleteGoal(goal.id)}
+                        className="text-zinc-500 underline text-sm"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        style={{ zIndex: 1 }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        Desfazer
+                    </motion.button>
+                )}
+            </div>
+        </motion.li>
     )
 }
