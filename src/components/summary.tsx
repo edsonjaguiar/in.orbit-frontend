@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import dayjs from 'dayjs'
 import ptBR from 'dayjs/locale/pt-br'
+import timezone from 'dayjs/plugin/timezone'
+import utc from 'dayjs/plugin/utc'
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckCircle2, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
@@ -14,6 +16,9 @@ import { Progress, ProgressIndicator } from './ui/progress-bar'
 import { Separator } from './ui/separator'
 
 dayjs.locale(ptBR)
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export function Summary() {
     const { data } = useQuery({
@@ -46,7 +51,6 @@ export function Summary() {
     const firstDayOfWeek = dayjs().startOf('week').format('DD')
     const lastDayOfWeek = dayjs().endOf('week').format('DD')
     const month = dayjs().format('MMMM')
-
     const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1)
     const formattedDate = `${firstDayOfWeek} a ${lastDayOfWeek} de ${capitalizedMonth}`
 
@@ -114,9 +118,13 @@ export function Summary() {
                     {data.goalsPerDay ? (
                         Object.entries(data.goalsPerDay).map(
                             ([date, goals]) => {
-                                const weekDay = dayjs(date).format('dddd')
+                                const dateInYourTimezone =
+                                    dayjs(date).tz('America/Sao_Paulo')
+
+                                const weekDay =
+                                    dateInYourTimezone.format('dddd')
                                 const formattedDate =
-                                    dayjs(date).format('D[ de ]MMMM')
+                                    dateInYourTimezone.format('D[ de ]MMMM')
 
                                 return (
                                     <motion.div
@@ -183,21 +191,12 @@ interface GoalItemProps {
     handleDeleteGoal: (id: string) => void
 }
 
-interface GoalItemProps {
-    goal: {
-        id: string
-        title: string
-        completedAt: string
-    }
-    handleDeleteGoal: (id: string) => void
-}
-
 function GoalItem({ goal, handleDeleteGoal }: GoalItemProps) {
     const [isHovered, setIsHovered] = useState(false)
     const [isTextTruncated, setIsTextTruncated] = useState(false)
     const textRef = useRef<HTMLSpanElement>(null)
 
-    const time = dayjs(goal.completedAt).format('HH:mm')
+    const time = dayjs(goal.completedAt).tz('America/Sao_Paulo').format('HH:mm')
 
     useEffect(() => {
         if (textRef.current) {

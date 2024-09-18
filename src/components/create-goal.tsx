@@ -71,9 +71,9 @@ export function CreateGoal() {
                 <motion.form
                     onSubmit={handleSubmit(handleCreateGoal)}
                     className="flex-1 flex flex-col justify-between"
-                    initial={{ opacity: 0, y: 50 }} // Começa fora da tela
-                    animate={{ opacity: 1, y: 0 }} // Anima para a posição original
-                    transition={{ duration: 0.4 }} // Controla a duração da animação
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4 }}
                 >
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col gap-2">
